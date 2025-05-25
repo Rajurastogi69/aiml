@@ -1,0 +1,115 @@
+% 8-puzzle solver using BFS
+
+:- use_module(library(lists)).
+
+% Goal state
+goal([1,2,3,
+      4,5,6,
+      7,8,0]).
+
+% Possible moves
+move([A,B,C,
+      D,E,F,
+      G,H,0], left, [A,B,C,
+                     D,E,F,
+                     G,0,H]).
+
+move([A,B,C,
+      D,E,F,
+      G,0,H], left, [A,B,C,
+                     D,E,F,
+                     0,G,H]).
+
+move([A,B,C,
+      D,E,F,
+      0,G,H], up, [A,B,C,
+                   0,E,F,
+                   D,G,H]).
+
+move([A,B,C,
+      0,E,F,
+      D,G,H], up, [0,B,C,
+                   A,E,F,
+                   D,G,H]).
+
+move([0,B,C,
+      A,E,F,
+      D,G,H], right, [B,0,C,
+                      A,E,F,
+                      D,G,H]).
+
+move([B,0,C,
+      A,E,F,
+      D,G,H], right, [B,C,0,
+                      A,E,F,
+                      D,G,H]).
+
+move([A,B,C,
+      D,E,F,
+      0,G,H], right, [A,B,C,
+                      D,E,F,
+                      G,0,H]).
+
+move([A,B,C,
+      D,E,F,
+      G,0,H], right, [A,B,C,
+                      D,E,F,
+                      G,H,0]).
+
+move([A,B,C,
+      0,E,F,
+      G,H,I], down, [A,B,C,
+                     G,E,F,
+                     0,H,I]).
+
+move([A,B,C,
+      D,0,F,
+      G,H,I], down, [A,B,C,
+                     D,H,F,
+                     G,0,I]).
+
+move([A,B,C,
+      D,E,0,
+      G,H,I], down, [A,B,C,
+                     D,E,I,
+                     G,H,0]).
+
+move([A,B,0,
+      D,E,F,
+      G,H,I], left, [A,0,B,
+                     D,E,F,
+                     G,H,I]).
+
+move([A,0,C,
+      D,E,F,
+      G,H,I], left, [0,A,C,
+                     D,E,F,
+                     G,H,I]).
+
+% BFS Search
+solve(Start, Solution) :-
+    bfs([[Start]], [], Solution).
+
+% Base case: Found goal
+bfs([[State|Path]|_], _, [State|Path]) :-
+    goal(State).
+
+% Recursive case
+bfs([[State|Path]|Rest], Visited, Solution) :-
+    findall([NewState,State|Path],
+            (move(State, _, NewState),
+             \+ member(NewState, Visited),
+             \+ member([NewState|_], Rest)),
+            NewPaths),
+    append(Rest, NewPaths, Queue),
+    bfs(Queue, [State|Visited], Solution).
+
+% Pretty printing
+print_solution([]).
+print_solution([State|Rest]) :-
+    write(State), nl,
+    print_solution(Rest).
+
+
+Run Command:
+solve([1,2,3,4,0,6,7,5,8],Solution),print_solution(Solution).
